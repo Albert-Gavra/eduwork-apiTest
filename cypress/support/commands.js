@@ -23,3 +23,27 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+Cypress.Commands.add('loginViaAPI', (
+    email = Cypress.env('userEmail'),
+    password = Cypress.env('userPassword')
+) => {
+    cy.request({
+        method: 'POST',
+        url: `${Cypress.env('apiUrl')}/login`,
+        headers: {
+            'x-api-key': 'reqres-free-v1',  
+        },
+        body: {
+            email: email, 
+            password: password,
+        }
+    }).then((response) => {
+        expect(response.status).to.eq(200);
+        expect(response.body).to.have.property('token');
+        const token = response.body.token;
+        cy.setCookie('authToken', token);
+
+        cy.log('Token:', token);
+    })
+});
